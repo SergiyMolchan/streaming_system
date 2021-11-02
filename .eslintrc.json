@@ -1,0 +1,142 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es6": true,
+        "node": true,
+        "jest/globals": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:security/recommended",
+        "plugin:jest/recommended"
+    ],
+    "globals": {
+        "__dirname": true,
+        "__filename": true,
+        "__root": true,
+        "process": true,
+        "infoLog": true,
+        "errorLog": true,
+        "config": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 2018
+    },
+    "plugins": [
+        "security",
+        "json",
+        "jest"
+    ],
+    "ignorePatterns": ["./.commitlintrc.json", "pg-main"],
+    "rules": {
+        "security/detect-object-injection": "off",
+        "indent": [
+            "error",
+            "tab",
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "no-console": [
+            "off"
+        ],
+        "no-multiple-empty-lines": [
+            "error",
+            {
+                "max": 2,
+                "maxEOF": 1,
+                "maxBOF": 0
+            }
+        ],
+        "no-trailing-spaces": [
+            "error"
+        ],
+        "eol-last": [
+            "error"
+        ],
+        "no-empty": [
+            "error",
+            {
+                "allowEmptyCatch": true
+            }
+        ],
+        "max-len": [
+            "error",
+            {
+                "code": 120,
+                "ignoreComments": true,
+                "ignoreUrls": true,
+                "ignoreTemplateLiterals": true,
+                "ignoreStrings": true
+            }
+        ],
+        "object-curly-spacing": [
+            "error",
+            "always"
+        ],
+        "space-in-parens": [
+            "error",
+            "never"
+        ],
+        "comma-spacing": [
+            "error",
+            {
+                "before": false,
+                "after": true
+            }
+        ],
+        "key-spacing": [
+            "error",
+            {
+                "beforeColon": false,
+                "afterColon": true
+            }
+        ],
+        "keyword-spacing": [
+            "error",
+            {
+                "before": true,
+                "after": true
+            }
+        ],
+        "arrow-spacing": [
+            "error",
+            {
+                "before": true,
+                "after": true
+            }
+        ],
+        "no-spaced-func": [
+            "error"
+        ],
+        "space-before-function-paren": [
+            "error",
+            {
+                "anonymous": "always",
+                "named": "never",
+                "asyncArrow": "always"
+            }
+        ],
+        "block-spacing": [
+            "error",
+            "always"
+        ],
+        "space-before-blocks": [
+            "error",
+            "always"
+        ],
+        "unicode-bom": [
+            "error",
+            "never"
+        ]
+    }
+}

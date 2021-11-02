@@ -1,0 +1,7 @@
+{
+  "name": "financial-tracker",
+  "version": "0.1.0",
+  "description": "REST API documentation",
+  "title": "financial-tracker",
+  "url" : "{protocol}://{host}.{domain}"
+}
