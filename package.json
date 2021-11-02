@@ -4,7 +4,7 @@
   "description": "api for application finance-tracker",
   "main": "index.js",
   "scripts": {
-    "dev:run": "node ./src/server.js",
+    "dev:run": "nodemon",
     "doc": "$(pwd)/node_modules/.bin/apidoc -i src/ -o doc/",
     "eslint": "eslint ./src --fix",
     "test": "jest --coverage"
