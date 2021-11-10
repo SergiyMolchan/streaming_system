@@ -17,7 +17,7 @@ const app = fastify({
 });
 app.register(fastifyCookie, { secret: 'sdfsdf' });
 app.register(require('fastify-static'), {
-	root: path.join(process.cwd(), 'static', 'app'),
+	root: path.join(process.cwd(), 'static', 'peer-to-server'),
 	prefix: '/'
 });
 
@@ -85,19 +85,33 @@ ws.on('request', function (request) {
 		return;
 	}
 
-	var connection = request.accept('echo-protocol', request.origin);
+	const connection = request.accept('json', request.origin);
 	console.log((new Date()) + ' Connection accepted.');
 	connection.on('message', function (message) {
-		if (message.type === 'utf8') {
-			console.log('Received Message: ' + message.utf8Data);
-			connection.sendUTF(message.utf8Data);
-		}
-		else if (message.type === 'binary') {
-			console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-			connection.sendBytes(message.binaryData);
-		}
+		console.log('message', message);
 	});
 	connection.on('close', function (reasonCode, description) {
 		console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
 	});
 });
+
+
+function beforeOffer(peerConnection) {
+	const dataChannel = peerConnection.createDataChannel('ping-pong');
+
+	function onMessage({ data }) {
+		if (data === 'ping') {
+			dataChannel.send('pong');
+		}
+	}
+
+	dataChannel.addEventListener('message', onMessage);
+
+	const { close } = peerConnection;
+	peerConnection.close = function () {
+		dataChannel.removeEventListener('message', onMessage);
+		return close.apply(this, arguments);
+	};
+}
+
+require('wrtc');
