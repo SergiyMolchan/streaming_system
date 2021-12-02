@@ -87,8 +87,9 @@ ws.on('request', function (request) {
 
 	const connection = request.accept('json', request.origin);
 	console.log((new Date()) + ' Connection accepted.');
-	connection.on('message', function (message) {
+	connection.on('message', message => {
 		console.log('message', message);
+		connection.send(message.utf8Data);
 	});
 	connection.on('close', function (reasonCode, description) {
 		console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
