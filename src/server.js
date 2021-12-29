@@ -77,6 +77,8 @@ function originIsAllowed(origin) {
 	return true;
 }
 
+const { RTCPeerConnection, RTCSessionDescription, RTCIceCandidate } = require('wrtc');
+
 ws.on('request', function (request) {
 	if (!originIsAllowed(request.origin)) {
 		// Make sure we only accept requests from an allowed origin
@@ -87,32 +89,32 @@ ws.on('request', function (request) {
 
 	const connection = request.accept('json', request.origin);
 	console.log((new Date()) + ' Connection accepted.');
-	connection.on('message', message => {
-		console.log('message', message);
-		connection.send(message.utf8Data);
+	connection.on('message', async message => {
+		const data = JSON.parse(message.utf8Data);
+		// console.log('message', data);
+
+		const offer = data;
+		const peerConnection = new RTCPeerConnection();
+		peerConnection.onicecandidate = e => {
+			const answer = peerConnection.localDescription;
+			// console.log('icecandidate', JSON.stringify(answer));
+			connection.send(JSON.stringify(answer));
+		}
+		await peerConnection.setRemoteDescription(offer);
+
+		let dataChannel;
+		peerConnection.ondatachannel = e => {
+			dataChannel = e.channel
+			dataChannel.onopen = () => console.log('data channel is opened')
+			dataChannel.onerror = error => console.error('channel error: ', error)
+			dataChannel.onmessage  = e => console.log('channel message: ', e.data)
+		}
+
+		// await peerConnection.addIceCandidate({});
+		const answer = await peerConnection.createAnswer();
+		await peerConnection.setLocalDescription(answer);
 	});
 	connection.on('close', function (reasonCode, description) {
 		console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
 	});
 });
-
-
-function beforeOffer(peerConnection) {
-	const dataChannel = peerConnection.createDataChannel('ping-pong');
-
-	function onMessage({ data }) {
-		if (data === 'ping') {
-			dataChannel.send('pong');
-		}
-	}
-
-	dataChannel.addEventListener('message', onMessage);
-
-	const { close } = peerConnection;
-	peerConnection.close = function () {
-		dataChannel.removeEventListener('message', onMessage);
-		return close.apply(this, arguments);
-	};
-}
-
-require('wrtc');
