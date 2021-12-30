@@ -95,6 +95,10 @@ ws.on('request', function (request) {
 
 		const offer = data;
 		const peerConnection = new RTCPeerConnection();
+		peerConnection.ontrack = stream => {
+			console.log('stream', stream);
+			peerConnection.addTrack(stream.track, stream.streams[0])
+		}
 		peerConnection.onicecandidate = e => {
 			const answer = peerConnection.localDescription;
 			// console.log('icecandidate', JSON.stringify(answer));
@@ -113,6 +117,8 @@ ws.on('request', function (request) {
 		// await peerConnection.addIceCandidate({});
 		const answer = await peerConnection.createAnswer();
 		await peerConnection.setLocalDescription(answer);
+
+		// peerConnection.addEventListener('track', e => console.log('ok')) // is not worked
 	});
 	connection.on('close', function (reasonCode, description) {
 		console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');

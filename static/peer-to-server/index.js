@@ -2,23 +2,6 @@ const connection = new WebSocket('ws://localhost:8080', 'json');
 // todo: reserch https://github.com/webrtc/samples/blob/gh-pages/src/content/peerconnection/multiple/js/main.js
 // web cam local
 const localVideo = document.getElementById('local_video');
-let streaming = false;
-
-localVideo.addEventListener('canplay', () => {
-	if (!streaming) streaming = true;
-}, false);
-
-async function enableWebCam({ videoElement }) {
-	try {
-		videoElement.srcObject = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-		videoElement.play();
-	} catch (err) {
-		console.log('enableVebCam error: ' + err);
-	}
-}
-
-// stream video
-// const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] };
 
 const streamVideo = document.getElementById('streaming_video');
 
@@ -34,16 +17,26 @@ const streamVideo = document.getElementById('streaming_video');
 	dataChannel.onopen = () => console.log('data channel is opened')
 	dataChannel.onerror = error => console.error('channel error: ', error)
 	dataChannel.onmessage  = e => console.log('channel message: ', e.data)
-
+	let localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+	localVideo.srcObject = localStream;
+	localVideo.play();
+	localStream.getTracks().forEach(track => {
+		peerConnection.addTrack(track, localStream);
+	});
+	peerConnection.ontrack = async (event) => {
+		console.log('ok')
+		const [remoteStream] = event.streams;
+		console.log('remoteStream', remoteStream)
+		streamVideo.srcObject = remoteStream;
+	};
 
 
 	const offer = await peerConnection.createOffer();
 	await peerConnection.setLocalDescription(offer);
 
-	connection.addEventListener('message', event => {
+	connection.addEventListener('message', async event => {
 		const answer = JSON.parse(event.data);
 		peerConnection.setRemoteDescription(answer);
 		dataChannel.send('hello');
 	});
-
 })()
