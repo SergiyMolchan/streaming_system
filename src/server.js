@@ -77,8 +77,8 @@ function originIsAllowed(origin) {
 	return true;
 }
 
-const { RTCPeerConnection, RTCSessionDescription, RTCIceCandidate } = require('wrtc');
-const { RTCVideoSink, RTCVideoSource, RTCAudioSink } = require('wrtc').nonstandard;
+const { RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, MediaStream, MediaStreamTrack } = require('wrtc');
+const { RTCVideoSink, RTCVideoSource, RTCAudioSink, RTCAudioSource } = require('wrtc').nonstandard;
 
 ws.on('request', function (request) {
 	if (!originIsAllowed(request.origin)) {
@@ -99,13 +99,32 @@ ws.on('request', function (request) {
 
 		peerConnection.ontrack = stream => {
 			console.log('stream', stream);
-			peerConnection.addTrack(stream.track, stream.streams[0])
 
-			console.log('ok')
-			const sink = new RTCVideoSink(peerConnection.getTransceivers()[0].receiver.track);
-			sink.onframe = ({ frame }) => {
-				console.log('frame',frame)
+			const remoteMediaStream = stream.streams[0];
+			// mediaStream.addTrack(peerConnection.getTransceivers()[1].receiver.track)
+			const videoSink = new RTCVideoSink(remoteMediaStream.getVideoTracks()[0]);
+			const videoSource = new RTCVideoSource();
+			const videoTrack = videoSource.createTrack()
+			videoSink.onframe = ({ frame }) => {
+				// console.log('frame',frame)
+				// console.log('video frame')
+				videoSource.onFrame(frame)
 			};
+
+			const audioSink = new RTCAudioSink(remoteMediaStream.getAudioTracks()[0])
+			const audioSource = new RTCAudioSource();
+			const audioTrack = audioSource.createTrack()
+			audioSink.ondata = data => {
+				// console.log('audio', data);
+				// console.log('audio');
+				audioSource.onData(data);
+			};
+			const mediaStream = new MediaStream();
+			mediaStream.addTrack(audioTrack);
+			mediaStream.addTrack(videoTrack);
+
+			peerConnection.addTrack(audioTrack, mediaStream); // send stream
+			peerConnection.addTrack(videoTrack, mediaStream); // send stream
 		}
 
 		peerConnection.onicecandidate = e => {

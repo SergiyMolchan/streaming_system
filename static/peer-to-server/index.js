@@ -17,7 +17,7 @@ const streamVideo = document.getElementById('streaming_video');
 	dataChannel.onopen = () => console.log('data channel is opened')
 	dataChannel.onerror = error => console.error('channel error: ', error)
 	dataChannel.onmessage  = e => console.log('channel message: ', e.data)
-	let localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+	let localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 	localVideo.srcObject = localStream;
 	localVideo.play();
 	localStream.getTracks().forEach(track => {
