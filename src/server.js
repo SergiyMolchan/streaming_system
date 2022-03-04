@@ -2,6 +2,61 @@ const fastify = require('fastify');
 const fastifyCookie = require('fastify-cookie');
 const Ajv = require('ajv');
 const path = require('path');
+// const Redis = require("ioredis");
+// const redis = new Redis([{
+// 	port: 6379, // Redis port
+// 	host: "127.0.0.1",
+// }]);
+
+// const redisSub = new Redis([{
+// 	port: 6379, // Redis port
+// 	host: "127.0.0.1",
+// }]);
+//
+// redis.on('connect', () => {
+// 	console.log('Redis connected');
+// 	// redis.xadd("mystream", "*", "randomValue", 'adsadasd').then(() => {
+// 	// 	redis.xread("block", 0, "STREAMS", "mystream", 0).then(data => console.log('redis stream', data)).catch(console.error)
+// 	// })
+// })
+// redis.on('error', error => console.error(error))
+// const channel = 'stream'
+// redisSub.subscribe(channel, (err, count) => {
+// 	if (err) {
+// 		// Just like other commands, subscribe() can fail for some reasons,
+// 		// ex network issues.
+// 		console.error("Failed to subscribe: %s", err.message);
+// 	} else {
+// 		// `count` represents the number of channels this client are currently subscribed to.
+// 		console.log(
+// 			`Subscribed successfully! This client is currently subscribed to ${count} channels.`
+// 		);
+// 	}
+// });
+
+// const kafka = require('kafka-node');
+// const topics = [{
+// 	topic: 'topic-test',
+// 	partitions: 100,
+// 	replicationFactor: 1,
+// }];
+// const client = new kafka.KafkaClient({ kafkaHost: '127.0.0.1:9092' });
+// // client.createTopics(topics,(error, result) => {
+// // 	if (error) {
+// // 		console.log('topic error', error)
+// // 		return;
+// // 	}
+// // 	console.log('topic', result)
+// // });
+// const producer = new kafka.Producer(client);
+// const consumer = new kafka.Consumer(client, [{	topic: 'topic-test' }], { autoCommit: true, fetchMaxBytes: 200000000 })
+// producer.on('error', function (err) {
+// 	console.log('producer error', err);
+// });
+//
+// consumer.on('error', function (err) {
+// 	console.log('consumer error', err);
+// });
 
 const app = fastify({
 	logger: true,
@@ -64,7 +119,6 @@ const { host, port } = { port: 8080, host: '127.0.0.1' };
 	}
 })();
 
-
 // webSocket server
 const WebSocketServer = require('websocket').server;
 const ws = new WebSocketServer({
@@ -97,7 +151,7 @@ ws.on('request', function (request) {
 		const offer = data;
 		const peerConnection = new RTCPeerConnection();
 
-		peerConnection.ontrack = stream => {
+		peerConnection.ontrack = async  stream => {
 			console.log('stream', stream);
 
 			const remoteMediaStream = stream.streams[0];
@@ -106,10 +160,31 @@ ws.on('request', function (request) {
 			const videoSource = new RTCVideoSource();
 			const videoTrack = videoSource.createTrack()
 			videoSink.onframe = ({ frame }) => {
-				// console.log('frame',frame)
-				// console.log('video frame')
+				// console.log('frame',frame.data)
+				// frame.data = Array.from(frame.data)
+				// console.log('video frame', JSON.stringify(frame))
+				// producer.send([{ topic: topics[0].topic, messages: [JSON.stringify(frame)] }], function (
+				// 	err,
+				// 	result
+				// ) {
+				// 	// console.log(err || result);
+				// 	// process.exit();
+				// });
+				// redis.publish(channel, JSON.stringify(frame));
 				videoSource.onFrame(frame)
 			};
+			// redisSub.on("message", (channelName, message) => {
+			// 	const frame = JSON.parse(message)
+			// 	frame.data = Uint8Array.from(frame.data)
+			// 	videoSource.onFrame(frame)
+			// });
+			//
+			// consumer.on('message', function (message) {
+			// 	// console.log('message', JSON.parse(message.value));
+			// 	const frame = JSON.parse(message.value)
+			// 	frame.data = Uint8Array.from(frame.data)
+			// 	videoSource.onFrame(frame)
+			// });
 
 			const audioSink = new RTCAudioSink(remoteMediaStream.getAudioTracks()[0])
 			const audioSource = new RTCAudioSource();

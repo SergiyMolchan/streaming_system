@@ -1,27 +1,36 @@
-const { RTCVideoSource, RTCVideoSink } = require('wrtc').nonstandard;
+const { Kafka } = require('kafkajs')
 
-const source = new RTCVideoSource();
-const track = source.createTrack();
-console.log(track)
-const sink = new RTCVideoSink(track);
+const kafka = new Kafka({
+    clientId: 'my-app',
+    brokers: ['127.0.0.1:9092']
+})
 
-const width = 320;
-const height = 240;
-const data = new Uint8ClampedArray(width * height * 1.5);
-const frame = { width, height, data };
+const producer = kafka.producer()
+const consumer = kafka.consumer({ groupId: 'test-group' })
 
-const interval = setInterval(() => {
-    // Update the frame in some way before sending.
-    source.onFrame(frame);
-});
+const run = async () => {
+    // Producing
+    await producer.connect()
+    await producer.send({
+        topic: 'test-topic',
+        messages: [
+            { value: 'Hello KafkaJS user!' },
+        ],
+    })
 
-sink.onframe = ({ frame }) => {
-    // Do something with the received frame.
-    // console.log('frame',frame)
-};
+    // Consuming
+    await consumer.connect()
+    await consumer.subscribe({ topic: 'test-topic', fromBeginning: true })
 
-setTimeout(() => {
-    clearInterval(interval);
-    track.stop();
-    sink.stop();
-}, 10000);
+    await consumer.run({
+        eachMessage: async ({ topic, partition, message }) => {
+            console.log({
+                partition,
+                offset: message.offset,
+                value: message.value.toString(),
+            })
+        },
+    })
+}
+
+run().catch(console.error)
