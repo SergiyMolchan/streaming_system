@@ -1,0 +1,3 @@
+[submodule "streaming_system_server"]
+	path = streaming_system_server
+	url = https://github.com/SergiyMolchan/streaming_system_server.git
