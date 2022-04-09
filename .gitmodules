@@ -1,3 +1,6 @@
 [submodule "streaming_system_server"]
 	path = streaming_system_server
 	url = https://github.com/SergiyMolchan/streaming_system_server.git
+[submodule "streaming_system_webclient"]
+	path = streaming_system_webclient
+	url = https://github.com/SergiyMolchan/streaming_system_webclient.git
