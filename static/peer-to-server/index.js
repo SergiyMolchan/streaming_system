@@ -10,7 +10,7 @@ const streamVideo = document.getElementById('streaming_video');
 	peerConnection.onicecandidate = e => {
 		const offer = peerConnection.localDescription;
 		// console.log('icecandidate', JSON.stringify(offer));
-		connection.send(JSON.stringify(offer));
+		connection.send(JSON.stringify({event: 'webrtc', data: offer }));
 	}
 
 	const dataChannel = peerConnection.createDataChannel('test');
